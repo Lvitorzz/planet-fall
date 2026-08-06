@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Planet Fall</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <canvas id="game-canvas"></canvas>
+
+    <div class="game-hud">
+        <div class="game-title">
+            Planet Fall
+        </div>
+
+        <div class="game-instructions">
+            Clique no chão ou selecione um recurso
+        </div>
+
+        <div class="survival-status">
+            <div class="status-header">
+                <span>Stamina</span>
+                <strong id="stamina-value">
+                    100
+                </strong>
+            </div>
+
+            <div class="status-bar">
+                <div
+                    id="stamina-fill"
+                    class="status-fill stamina-fill"
+                ></div>
+            </div>
+
+            <div class="status-header">
+                <span>Saciedade</span>
+                <strong id="satiety-value">
+                    80
+                </strong>
+            </div>
+
+            <div class="status-bar">
+                <div
+                    id="satiety-fill"
+                    class="status-fill satiety-fill"
+                ></div>
+            </div>
+
+            <div
+                id="condition-message"
+                class="condition-message"
+            >
+                Condição estável.
+            </div>
+        </div>
+
+        <div class="inventory">
+            <div class="inventory-title">
+                Recursos
+            </div>
+
+            <div class="inventory-item">
+                Madeira:
+                <strong id="wood-amount">
+                    0
+                </strong>
+            </div>
+
+            <div class="inventory-item">
+                Pedra:
+                <strong id="stone-amount">
+                    0
+                </strong>
+            </div>
+
+            <div class="inventory-item">
+                Frutas:
+                <strong id="berries-amount">
+                    0
+                </strong>
+            </div>
+
+            <div class="inventory-item">
+                Rações da nave:
+                <strong id="rations-amount">
+                    3
+                </strong>
+            </div>
+        </div>
+
+        <div class="food-actions">
+            <button
+                id="eat-berry-button"
+                class="hud-button"
+                type="button"
+            >
+                Comer fruta
+            </button>
+
+            <button
+                id="eat-ration-button"
+                class="hud-button"
+                type="button"
+            >
+                Comer ração
+            </button>
+        </div>
+
+        <div class="task-planner">
+            <div class="task-planner-header">
+                <span>Plano de ações</span>
+
+                <strong id="queue-count">
+                    0/2
+                </strong>
+            </div>
+
+            <div class="current-task-card">
+                <span class="task-card-label">
+                    Agora
+                </span>
+
+                <strong id="current-task-label">
+                    Nenhuma ação em andamento
+                </strong>
+            </div>
+
+            <div class="queued-tasks-title">
+                Próximas ações
+            </div>
+
+            <div
+                id="task-queue-list"
+                class="task-queue-list"
+            >
+                <div class="empty-task-queue">
+                    Nenhuma ação na fila
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="task-status"
+            class="task-status"
+        >
+            Aguardando ordens.
+        </div>
+    </div>
+
+    <div
+        id="resource-panel"
+        class="resource-panel hidden"
+    >
+        <div
+            id="resource-name"
+            class="resource-name"
+        >
+            Recurso
+        </div>
+
+        <div
+            id="resource-description"
+            class="resource-description"
+        >
+            Informações do recurso
+        </div>
+
+        <button
+            id="resource-action-button"
+            type="button"
+        >
+            Coletar
+        </button>
+    </div>
+
+    <script
+        type="module"
+        src="./src/main.js"
+    ></script>
+</body>
+</html>

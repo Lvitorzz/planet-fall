@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Planet Fall</title>
+    <link rel="stylesheet" href="./css/menu.css">
+</head>
+<body>
+    <div class="menu-screen">
+        <div class="menu-background">
+        <video
+            id="menu-background-video"
+            class="menu-background-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            poster="./assets/images/menu-bg.jpeg"
+        >
+            <source
+                src="./assets/images/menu-bg.webm"
+                type="video/webm"
+            >
+
+            <source
+                src="./assets/images/menu-bg.mp4"
+                type="video/mp4"
+            >
+
+            Seu navegador não suporta vídeo HTML5.
+        </video>
+    </div>
+
+    <div class="menu-overlay"></div>
+
+        <main class="menu-content">
+            <section class="menu-panel">
+                <p class="menu-tag">Indie Strategy Survival</p>
+                <h1 class="game-title">Planet Fall</h1>
+                <p class="game-subtitle">
+                    Sobreviva ao dia. Defenda a noite. Escape do planeta.
+                </p>
+
+                <nav class="main-menu">
+                    <button
+                        class="menu-button primary"
+                        id="new-game-button"
+                    >
+                        Novo Jogo
+                    </button>
+
+                    <button
+                        class="menu-button"
+                        id="how-to-play-button"
+                    >
+                        Como jogar
+                    </button>
+
+                    <button
+                        class="menu-button disabled"
+                        id="online-mode-button"
+                        disabled
+                    >
+                        Modo online
+                        <span>(em desenvolvimento)</span>
+                    </button>
+
+                    <button
+                        class="menu-button"
+                        id="credits-button"
+                    >
+                        Créditos
+                    </button>
+                </nav>
+            </section>
+        </main>
+
+        <footer class="menu-footer">
+            <span>Versão MVP</span>
+            <span>© Planet Fall</span>
+        </footer>
+
+        <!-- Modal Como Jogar -->
+        <div class="modal hidden" id="how-to-play-modal">
+            <div class="modal-card">
+                <button class="modal-close" data-close-modal>
+                    ×
+                </button>
+
+                <h2>Como jogar</h2>
+
+                <div class="modal-text">
+                    <p>
+                        <strong>Objetivo:</strong> sobreviver,
+                        coletar recursos e restaurar sua nave.
+                    </p>
+
+                    <p>
+                        <strong>Durante o dia:</strong> explore
+                        o mapa, colete madeira, pedra, frutas e sucata.
+                    </p>
+
+                    <p>
+                        <strong>Durante a noite:</strong> prepare-se
+                        para ataques de criaturas hostis.
+                    </p>
+
+                    <p>
+                        <strong>Controles atuais do MVP:</strong>
+                    </p>
+
+                    <ul>
+                        <li>Clique em um recurso para selecioná-lo.</li>
+                        <li>Clique no botão de ação para coletar.</li>
+                        <li>Você pode enfileirar ações.</li>
+                        <li>Use frutas e rações para recuperar energia.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Créditos -->
+        <div class="modal hidden" id="credits-modal">
+            <div class="modal-card">
+                <button class="modal-close" data-close-modal>
+                    ×
+                </button>
+
+                <h2>Créditos</h2>
+
+                <div class="modal-text">
+                    <p><strong>Jogo:</strong> Planet Fall</p>
+                    <p><strong>Desenvolvimento:</strong> Seu nome aqui</p>
+                    <p><strong>Design / Conceito:</strong> Seu nome aqui</p>
+                    <p><strong>Música:</strong> Main Title Theme</p>
+                    <p><strong>Status:</strong> MVP em desenvolvimento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio
+        id="menu-music"
+        src="./assets/sounds/main-title.mp3"
+        loop
+    ></audio>
+
+    <script>
+        const howToPlayButton = document.querySelector("#how-to-play-button");
+        const creditsButton = document.querySelector("#credits-button");
+        const newGameButton = document.querySelector("#new-game-button");
+
+        const howToPlayModal = document.querySelector("#how-to-play-modal");
+        const creditsModal = document.querySelector("#credits-modal");
+
+        const closeButtons = document.querySelectorAll("[data-close-modal]");
+        const menuMusic = document.querySelector("#menu-music");
+
+        function openModal(modal) {
+            modal.classList.remove("hidden");
+        }
+
+        function closeModal(modal) {
+            modal.classList.add("hidden");
+        }
+
+        howToPlayButton.addEventListener("click", () => {
+            openModal(howToPlayModal);
+        });
+
+        creditsButton.addEventListener("click", () => {
+            openModal(creditsModal);
+        });
+
+        closeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const modal = button.closest(".modal");
+                closeModal(modal);
+            });
+        });
+
+        document.querySelectorAll(".modal").forEach((modal) => {
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        newGameButton.addEventListener("click", () => {
+            window.location.href = "./game.html";
+        });
+
+        // Tentativa de tocar automaticamente
+        menuMusic.volume = 0.45;
+        menuMusic.play().catch(() => {
+            // Navegadores geralmente bloqueiam autoplay sem interação.
+        });
+
+        // Garante que a música comece assim que o jogador interagir
+        function startMusicOnFirstInteraction() {
+            menuMusic.play().catch(() => {});
+            window.removeEventListener("click", startMusicOnFirstInteraction);
+            window.removeEventListener("keydown", startMusicOnFirstInteraction);
+        }
+
+        window.addEventListener("click", startMusicOnFirstInteraction);
+        window.addEventListener("keydown", startMusicOnFirstInteraction);
+    </script>
+</body>
+</html>
