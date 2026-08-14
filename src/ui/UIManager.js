@@ -1,10 +1,14 @@
 export class UIManager {
     constructor({
-        onResourceAction,
-        onEatBerry,
-        onEatRation,
-        onRemoveQueuedTask
-    }) {
+    onResourceAction,
+    onEatBerry,
+    onRest,
+    onEatRation,
+    onRepairGenerator,
+    onRemoveQueuedTask,
+    onRestartGame,
+    onReturnMenu
+}) {
         this.resourcePanel =
             document.querySelector(
                 "#resource-panel"
@@ -25,6 +29,106 @@ export class UIManager {
                 "#resource-action-button"
             );
 
+        this.spaceshipPanel =
+            document.querySelector(
+                "#spaceship-panel"
+            );
+
+        this.restButton =
+            document.querySelector(
+                "#rest-button"
+            );
+
+        this.shipEatRationButton =
+            document.querySelector(
+                "#ship-eat-ration-button"
+            );
+
+        this.shipRationsAmount =
+            document.querySelector(
+                "#ship-rations-amount"
+            );
+
+        this.repairGeneratorButton =
+            document.querySelector(
+                "#repair-generator-button"
+            );
+
+        this.generatorStatus =
+            document.querySelector(
+                "#generator-status"
+            );
+
+        this.generatorScrapRequirement =
+            document.querySelector(
+                "#generator-scrap-requirement"
+            );
+
+        this.radarModule =
+            document.querySelector(
+                "#radar-module"
+            );
+
+        this.radarStatus =
+            document.querySelector(
+                "#radar-status"
+            );
+
+        this.radarMessage =
+            document.querySelector(
+                "#radar-message"
+            );
+
+            this.healthValue =
+    document.querySelector(
+        "#health-value"
+    );
+
+this.healthFill =
+    document.querySelector(
+        "#health-fill"
+    );
+
+this.shipIntegrityValue =
+    document.querySelector(
+        "#ship-integrity-value"
+    );
+
+this.shipIntegrityFill =
+    document.querySelector(
+        "#ship-integrity-fill"
+    );
+
+this.threatCount =
+    document.querySelector(
+        "#threat-count"
+    );
+
+this.gameOverOverlay =
+    document.querySelector(
+        "#game-over-overlay"
+    );
+
+this.gameOverTitle =
+    document.querySelector(
+        "#game-over-title"
+    );
+
+this.gameOverMessage =
+    document.querySelector(
+        "#game-over-message"
+    );
+
+this.restartGameButton =
+    document.querySelector(
+        "#restart-game-button"
+    );
+
+this.returnMenuButton =
+    document.querySelector(
+        "#return-menu-button"
+    );
+
         this.taskStatus =
             document.querySelector(
                 "#task-status"
@@ -38,6 +142,11 @@ export class UIManager {
         this.stoneAmount =
             document.querySelector(
                 "#stone-amount"
+            );
+
+        this.scrapAmount =
+            document.querySelector(
+                "#scrap-amount"
             );
 
         this.berriesAmount =
@@ -80,11 +189,6 @@ export class UIManager {
                 "#eat-berry-button"
             );
 
-        this.eatRationButton =
-            document.querySelector(
-                "#eat-ration-button"
-            );
-
         this.currentTaskLabel =
             document.querySelector(
                 "#current-task-label"
@@ -99,6 +203,52 @@ export class UIManager {
             document.querySelector(
                 "#task-queue-list"
             );
+
+            this.dayNumber =
+    document.querySelector(
+        "#day-number"
+    );
+
+this.phaseName =
+    document.querySelector(
+        "#phase-name"
+    );
+
+this.cycleIcon =
+    document.querySelector(
+        "#cycle-icon"
+    );
+
+this.cycleCountdownLabel =
+    document.querySelector(
+        "#cycle-countdown-label"
+    );
+
+this.cycleCountdown =
+    document.querySelector(
+        "#cycle-countdown"
+    );
+
+this.cycleProgressFill =
+    document.querySelector(
+        "#cycle-progress-fill"
+    );
+
+    this.restartGameButton
+    .addEventListener(
+        "click",
+        () => {
+            onRestartGame?.();
+        }
+    );
+
+this.returnMenuButton
+    .addEventListener(
+        "click",
+        () => {
+            onReturnMenu?.();
+        }
+    );
 
         this.currentResourceActionLabel =
             "Coletar";
@@ -118,12 +268,28 @@ export class UIManager {
             }
         );
 
-        this.eatRationButton.addEventListener(
+        this.restButton.addEventListener(
             "click",
             () => {
-                onEatRation?.();
+                onRest?.();
             }
         );
+
+        this.shipEatRationButton
+            .addEventListener(
+                "click",
+                () => {
+                    onEatRation?.();
+                }
+            );
+
+        this.repairGeneratorButton
+            .addEventListener(
+                "click",
+                () => {
+                    onRepairGenerator?.();
+                }
+            );
 
         this.taskQueueList.addEventListener(
             "click",
@@ -137,12 +303,17 @@ export class UIManager {
                     return;
                 }
 
-                const queueIndex = Number(
-                    removeButton.dataset.queueIndex
-                );
+                const queueIndex =
+                    Number(
+                        removeButton
+                            .dataset
+                            .queueIndex
+                    );
 
                 if (
-                    !Number.isInteger(queueIndex)
+                    !Number.isInteger(
+                        queueIndex
+                    )
                 ) {
                     return;
                 }
@@ -154,7 +325,74 @@ export class UIManager {
         );
     }
 
+    updateTime(timeSystem) {
+    this.dayNumber.textContent =
+        `Dia ${timeSystem.dayNumber}`;
+
+    this.phaseName.textContent =
+        timeSystem.getPhaseLabel();
+
+    this.cycleIcon.textContent =
+        timeSystem.getPhaseIcon();
+
+    this.cycleCountdownLabel
+        .textContent =
+        timeSystem.getCountdownLabel();
+
+    this.cycleCountdown.textContent =
+        this.formatTime(
+            timeSystem
+                .getRemainingSeconds()
+        );
+
+    const progress =
+        timeSystem
+            .getPhaseProgress() *
+        100;
+
+    this.cycleProgressFill
+        .style
+        .width =
+        `${progress}%`;
+
+    document.body.classList.remove(
+        "day-phase",
+        "dusk-phase",
+        "night-phase",
+        "dawn-phase"
+    );
+
+    document.body.classList.add(
+        `${timeSystem.phase}-phase`
+    );
+}
+
+formatTime(totalSeconds) {
+    const seconds =
+        Math.max(
+            0,
+            Math.ceil(totalSeconds)
+        );
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    const remainingSeconds =
+        seconds % 60;
+
+    return (
+        `${String(minutes)
+            .padStart(2, "0")}:` +
+        `${String(remainingSeconds)
+            .padStart(2, "0")}`
+    );
+}
+
     showResource(resource) {
+        this.hideSpaceshipPanel();
+
         this.currentResourceActionLabel =
             resource.actionLabel;
 
@@ -167,11 +405,6 @@ export class UIManager {
             `Custo: ${resource.staminaCost} ` +
             `de stamina.`;
 
-        this.setResourceActionState({
-            enabled: true,
-            text: resource.actionLabel
-        });
-
         this.resourcePanel.classList.remove(
             "hidden"
         );
@@ -181,6 +414,37 @@ export class UIManager {
         this.resourcePanel.classList.add(
             "hidden"
         );
+    }
+
+    showSpaceship(
+        spaceship,
+        inventory
+    ) {
+        this.hideResourcePanel();
+
+        this.shipRationsAmount.textContent =
+            inventory.rations;
+
+        this.spaceshipPanel.classList.remove(
+            "hidden"
+        );
+
+        this.updateSpaceshipModules(
+            spaceship,
+            inventory
+        );
+    }
+
+    hideSpaceshipPanel() {
+        this.spaceshipPanel.classList.add(
+            "hidden"
+        );
+    }
+
+    hideInteractionPanels() {
+        this.hideResourcePanel();
+
+        this.hideSpaceshipPanel();
     }
 
     setResourceActionState({
@@ -195,6 +459,252 @@ export class UIManager {
             this.currentResourceActionLabel;
     }
 
+    setSpaceshipActionState({
+        restEnabled,
+        restText,
+        rationEnabled,
+        rationText
+    }) {
+        this.restButton.disabled =
+            !restEnabled;
+
+        this.restButton.textContent =
+            restText ??
+            "Descansar";
+
+        this.shipEatRationButton.disabled =
+            !rationEnabled;
+
+        this.shipEatRationButton.textContent =
+            rationText ??
+            "Comer ração";
+    }
+
+    updateSpaceshipModules(
+        spaceship,
+        inventory,
+        {
+            queueIsFull = false,
+            generatorRepairScheduled = false
+        } = {}
+    ) {
+        const generator =
+            spaceship.getModule(
+                "generator"
+            );
+
+        const radar =
+            spaceship.getModule(
+                "radar"
+            );
+
+        this.generatorScrapRequirement
+            .textContent =
+            `${inventory.scrap}/` +
+            `${generator.scrapCost}`;
+
+        this.generatorStatus.className =
+            "module-status";
+
+        if (
+            generator.status ===
+            "repaired"
+        ) {
+            this.generatorStatus
+                .classList.add(
+                    "repaired"
+                );
+
+            this.generatorStatus
+                .textContent =
+                "Online";
+
+            this.repairGeneratorButton
+                .disabled = true;
+
+            this.repairGeneratorButton
+                .textContent =
+                "Gerador online";
+        } else if (
+            generator.status ===
+            "repairing"
+        ) {
+            this.generatorStatus
+                .classList.add(
+                    "repairing"
+                );
+
+            this.generatorStatus
+                .textContent =
+                "Reparando";
+
+            this.repairGeneratorButton
+                .disabled = true;
+
+            this.repairGeneratorButton
+                .textContent =
+                "Reparo em andamento";
+        } else {
+            this.generatorStatus
+                .classList.add(
+                    "damaged"
+                );
+
+            this.generatorStatus
+                .textContent =
+                "Danificado";
+
+            if (
+                generatorRepairScheduled
+            ) {
+                this.repairGeneratorButton
+                    .disabled = true;
+
+                this.repairGeneratorButton
+                    .textContent =
+                    "Reparo programado";
+            } else if (
+                inventory.scrap <
+                generator.scrapCost
+            ) {
+                this.repairGeneratorButton
+                    .disabled = true;
+
+                this.repairGeneratorButton
+                    .textContent =
+                    `Sucata insuficiente ` +
+                    `(${inventory.scrap}/` +
+                    `${generator.scrapCost})`;
+            } else if (queueIsFull) {
+                this.repairGeneratorButton
+                    .disabled = true;
+
+                this.repairGeneratorButton
+                    .textContent =
+                    "Fila cheia (2/2)";
+            } else {
+                this.repairGeneratorButton
+                    .disabled = false;
+
+                this.repairGeneratorButton
+                    .textContent =
+                    "Reparar Gerador";
+            }
+        }
+
+        this.radarStatus.className =
+            "module-status";
+
+        if (
+            radar.status ===
+            "available"
+        ) {
+            this.radarModule.classList.remove(
+                "locked"
+            );
+
+            this.radarStatus.classList.add(
+                "available"
+            );
+
+            this.radarStatus.textContent =
+                "Desbloqueado";
+
+            this.radarMessage.textContent =
+                "Sistema disponível para uma futura reparação.";
+        } else {
+            this.radarModule.classList.add(
+                "locked"
+            );
+
+            this.radarStatus.classList.add(
+                "locked"
+            );
+
+            this.radarStatus.textContent =
+                "Bloqueado";
+
+            this.radarMessage.textContent =
+                "Repare o Gerador para desbloquear.";
+        }
+    }
+
+    updateVitals(
+    player,
+    spaceship
+) {
+    const healthPercent =
+        (
+            player.health /
+            player.maxHealth
+        ) * 100;
+
+    const integrityPercent =
+        (
+            spaceship.integrity /
+            spaceship.maxIntegrity
+        ) * 100;
+
+    this.healthValue.textContent =
+        Math.ceil(
+            player.health
+        );
+
+    this.healthFill.style.width =
+        `${healthPercent}%`;
+
+    this.shipIntegrityValue
+        .textContent =
+        `${Math.ceil(
+            spaceship.integrity
+        )} / ` +
+        `${spaceship.maxIntegrity}`;
+
+    this.shipIntegrityFill
+        .style
+        .width =
+        `${integrityPercent}%`;
+
+    this.updateStatusClass(
+        this.healthFill,
+        healthPercent
+    );
+
+    this.updateStatusClass(
+        this.shipIntegrityFill,
+        integrityPercent
+    );
+}
+
+updateThreats(
+    activeCount,
+    remainingCount = 0
+) {
+    this.threatCount.textContent =
+        activeCount;
+
+    this.threatCount.title =
+        `${remainingCount} criatura(s) ` +
+        `ainda podem surgir nesta noite.`;
+}
+
+showGameOver({
+    title,
+    message
+}) {
+    this.gameOverTitle.textContent =
+        title;
+
+    this.gameOverMessage.textContent =
+        message;
+
+    this.gameOverOverlay
+        .classList
+        .remove(
+            "hidden"
+        );
+}
+
     setTaskStatus(message) {
         this.taskStatus.textContent =
             message;
@@ -207,27 +717,34 @@ export class UIManager {
         this.stoneAmount.textContent =
             inventory.stone;
 
+        this.scrapAmount.textContent =
+            inventory.scrap;
+
         this.berriesAmount.textContent =
             inventory.berries;
 
         this.rationsAmount.textContent =
             inventory.rations;
 
+        this.shipRationsAmount.textContent =
+            inventory.rations;
+
         this.eatBerryButton.disabled =
             inventory.berries <= 0;
-
-        this.eatRationButton.disabled =
-            inventory.rations <= 0;
     }
 
-    updateSurvival(survivalSystem) {
-        const stamina = Math.round(
-            survivalSystem.stamina
-        );
+    updateSurvival(
+        survivalSystem
+    ) {
+        const stamina =
+            Math.round(
+                survivalSystem.stamina
+            );
 
-        const satiety = Math.round(
-            survivalSystem.satiety
-        );
+        const satiety =
+            Math.round(
+                survivalSystem.satiety
+            );
 
         this.staminaValue.textContent =
             stamina;
@@ -272,23 +789,27 @@ export class UIManager {
             `${taskQueue.length}/` +
             `${maximumQueuedTasks}`;
 
-        this.taskQueueList.replaceChildren();
+        this.taskQueueList
+            .replaceChildren();
 
-        if (taskQueue.length === 0) {
-            const emptyMessage =
+        if (
+            taskQueue.length === 0
+        ) {
+            const empty =
                 document.createElement(
                     "div"
                 );
 
-            emptyMessage.className =
+            empty.className =
                 "empty-task-queue";
 
-            emptyMessage.textContent =
+            empty.textContent =
                 "Nenhuma ação na fila";
 
-            this.taskQueueList.appendChild(
-                emptyMessage
-            );
+            this.taskQueueList
+                .appendChild(
+                    empty
+                );
 
             return;
         }
@@ -312,7 +833,9 @@ export class UIManager {
                     "queued-task-position";
 
                 position.textContent =
-                    String(index + 1);
+                    String(
+                        index + 1
+                    );
 
                 const content =
                     document.createElement(
@@ -322,66 +845,68 @@ export class UIManager {
                 content.className =
                     "queued-task-content";
 
-                const actionName =
+                const action =
                     document.createElement(
                         "strong"
                     );
 
-                actionName.textContent =
-                    task.resource.actionLabel;
+                action.textContent =
+                    task.label;
 
-                const resourceName =
+                const target =
                     document.createElement(
                         "small"
                     );
 
-                resourceName.textContent =
-                    task.resource.name;
+                target.textContent =
+                    task.targetName;
 
-                const removeButton =
+                const remove =
                     document.createElement(
                         "button"
                     );
 
-                removeButton.type = "button";
+                remove.type =
+                    "button";
 
-                removeButton.className =
+                remove.className =
                     "remove-queued-task";
 
-                removeButton.dataset.queueIndex =
+                remove.dataset
+                    .queueIndex =
                     String(index);
 
-                removeButton.textContent = "×";
-
-                removeButton.setAttribute(
-                    "aria-label",
-                    `Remover ${task.resource.actionLabel} da fila`
-                );
+                remove.textContent =
+                    "×";
 
                 content.append(
-                    actionName,
-                    resourceName
+                    action,
+                    target
                 );
 
                 item.append(
                     position,
                     content,
-                    removeButton
+                    remove
                 );
 
-                this.taskQueueList.appendChild(
-                    item
-                );
+                this.taskQueueList
+                    .appendChild(
+                        item
+                    );
             }
         );
     }
 
     describeCurrentTask(task) {
-        const resourceName =
-            task.resource.name;
-
-        if (task.state === "moving") {
-            return `Indo até: ${resourceName}`;
+        if (
+            task.state ===
+            "moving"
+        ) {
+            return (
+                `Indo até: ` +
+                `${task.targetName}`
+            );
         }
 
         if (
@@ -389,19 +914,37 @@ export class UIManager {
             "waiting_stamina"
         ) {
             return (
-                "Aguardando stamina: " +
-                resourceName
+                `Aguardando stamina: ` +
+                `${task.targetName}`
             );
         }
 
         if (
-            task.state ===
-            "collecting"
+            task.type ===
+            "rest"
         ) {
-            return task.resource.actionLabel;
+            return (
+                "Descansando na nave"
+            );
         }
 
-        return task.resource.actionLabel;
+        if (
+            task.type ===
+            "ration"
+        ) {
+            return (
+                "Comendo ração"
+            );
+        }
+
+        if (
+            task.type ===
+            "repair"
+        ) {
+            return task.label;
+        }
+
+        return task.label;
     }
 
     updateStatusClass(

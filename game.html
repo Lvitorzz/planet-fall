@@ -1,3 +1,5 @@
+<!-- game.html -->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -16,21 +18,77 @@
 <body>
     <canvas id="game-canvas"></canvas>
 
+    <div class="cycle-hud">
+    <div class="cycle-main">
+        <span
+            id="cycle-icon"
+            class="cycle-icon"
+        >
+            ☀
+        </span>
+
+        <div>
+            <div
+                id="day-number"
+                class="cycle-day"
+            >
+                Dia 1
+            </div>
+
+            <div
+                id="phase-name"
+                class="cycle-phase"
+            >
+                Dia
+            </div>
+        </div>
+    </div>
+
+    <div class="cycle-timer">
+        <span id="cycle-countdown-label">
+            Entardecer em
+        </span>
+
+        <strong id="cycle-countdown">
+            01:30
+        </strong>
+    </div>
+
+    <div class="cycle-progress">
+        <div
+            id="cycle-progress-fill"
+            class="cycle-progress-fill"
+        ></div>
+    </div>
+</div>
+
     <div class="game-hud">
         <div class="game-title">
             Planet Fall
         </div>
 
         <div class="game-instructions">
-            Clique no chão ou selecione um recurso
+            Clique no chão ou selecione um objeto
         </div>
 
         <div class="survival-status">
             <div class="status-header">
+    <span>Vida</span>
+
+    <strong id="health-value">
+        100
+    </strong>
+</div>
+
+<div class="status-bar">
+    <div
+        id="health-fill"
+        class="status-fill health-fill"
+    ></div>
+</div>
+            <div class="status-header">
                 <span>Stamina</span>
-                <strong id="stamina-value">
-                    100
-                </strong>
+                <strong id="stamina-value">100</strong>
             </div>
 
             <div class="status-bar">
@@ -42,9 +100,7 @@
 
             <div class="status-header">
                 <span>Saciedade</span>
-                <strong id="satiety-value">
-                    80
-                </strong>
+                <strong id="satiety-value">80</strong>
             </div>
 
             <div class="status-bar">
@@ -69,32 +125,62 @@
 
             <div class="inventory-item">
                 Madeira:
-                <strong id="wood-amount">
-                    0
-                </strong>
+                <strong id="wood-amount">0</strong>
             </div>
 
             <div class="inventory-item">
                 Pedra:
-                <strong id="stone-amount">
-                    0
-                </strong>
+                <strong id="stone-amount">0</strong>
+            </div>
+
+            <div class="inventory-item">
+                Sucata:
+                <strong id="scrap-amount">0</strong>
             </div>
 
             <div class="inventory-item">
                 Frutas:
-                <strong id="berries-amount">
-                    0
-                </strong>
+                <strong id="berries-amount">0</strong>
             </div>
 
             <div class="inventory-item">
-                Rações da nave:
-                <strong id="rations-amount">
-                    3
-                </strong>
+                Rações na nave:
+                <strong id="rations-amount">3</strong>
             </div>
         </div>
+
+        <div class="combat-status">
+    <div class="combat-status-title">
+        Situação
+    </div>
+
+    <div class="combat-status-row">
+        <span>Integridade da nave</span>
+
+        <strong
+            id="ship-integrity-value"
+        >
+            250 / 250
+        </strong>
+    </div>
+
+    <div class="status-bar">
+        <div
+            id="ship-integrity-fill"
+            class="status-fill integrity-fill"
+        ></div>
+    </div>
+
+    <div class="combat-status-row threat-row">
+        <span>Ameaças ativas</span>
+
+        <strong
+            id="threat-count"
+        >
+            0
+        </strong>
+    </div>
+</div>
 
         <div class="food-actions">
             <button
@@ -103,14 +189,6 @@
                 type="button"
             >
                 Comer fruta
-            </button>
-
-            <button
-                id="eat-ration-button"
-                class="hud-button"
-                type="button"
-            >
-                Comer ração
             </button>
         </div>
 
@@ -157,29 +235,218 @@
 
     <div
         id="resource-panel"
-        class="resource-panel hidden"
+        class="interaction-panel hidden"
     >
         <div
             id="resource-name"
-            class="resource-name"
+            class="interaction-name"
         >
             Recurso
         </div>
 
         <div
             id="resource-description"
-            class="resource-description"
+            class="interaction-description"
         >
             Informações do recurso
         </div>
 
         <button
             id="resource-action-button"
+            class="interaction-button"
             type="button"
         >
             Coletar
         </button>
     </div>
+
+    <div
+    id="spaceship-panel"
+    class="interaction-panel spaceship-panel hidden"
+>
+    <div class="interaction-name">
+        Nave danificada
+    </div>
+
+    <div class="interaction-description">
+        Sua nave é o ponto central da sobrevivência.
+        Restaure seus sistemas para conseguir escapar
+        deste planeta.
+    </div>
+
+    <div class="ship-info">
+        <span>Rações disponíveis</span>
+
+        <strong id="ship-rations-amount">
+            3
+        </strong>
+    </div>
+
+    <div class="ship-actions">
+        <button
+            id="rest-button"
+            class="interaction-button"
+            type="button"
+        >
+            Descansar
+        </button>
+
+        <button
+            id="ship-eat-ration-button"
+            class="interaction-button secondary"
+            type="button"
+        >
+            Comer ração
+        </button>
+    </div>
+
+    <div class="ship-modules">
+        <div class="ship-modules-header">
+            Sistemas da nave
+        </div>
+
+        <div
+            id="generator-module"
+            class="ship-module"
+        >
+            <div class="ship-module-header">
+                <strong>
+                    Gerador
+                </strong>
+
+                <span
+                    id="generator-status"
+                    class="module-status damaged"
+                >
+                    Danificado
+                </span>
+            </div>
+
+            <p>
+                Restaura a alimentação elétrica
+                básica da nave.
+            </p>
+
+            <div class="module-requirements">
+                <span>
+                    Sucata:
+                    <strong
+                        id="generator-scrap-requirement"
+                    >
+                        0/6
+                    </strong>
+                </span>
+
+                <span>
+                    Stamina:
+                    <strong>15</strong>
+                </span>
+            </div>
+
+            <button
+                id="repair-generator-button"
+                class="module-action-button"
+                type="button"
+            >
+                Reparar Gerador
+            </button>
+        </div>
+
+        <div
+            id="radar-module"
+            class="ship-module locked"
+        >
+            <div class="ship-module-header">
+                <strong>
+                    Radar
+                </strong>
+
+                <span
+                    id="radar-status"
+                    class="module-status locked"
+                >
+                    Bloqueado
+                </span>
+            </div>
+
+            <p>
+                Detecta ameaças e pontos
+                de interesse no planeta.
+            </p>
+
+            <div
+                id="radar-message"
+                class="module-lock-message"
+            >
+                Repare o Gerador para desbloquear.
+            </div>
+        </div>
+
+        <div
+            id="engine-module"
+            class="ship-module locked"
+        >
+            <div class="ship-module-header">
+                <strong>
+                    Motor
+                </strong>
+
+                <span
+                    id="engine-status"
+                    class="module-status locked"
+                >
+                    Bloqueado
+                </span>
+            </div>
+
+            <p>
+                Sistema principal necessário
+                para deixar o planeta.
+            </p>
+
+            <div class="module-lock-message">
+                Ainda não disponível.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div
+    id="game-over-overlay"
+    class="game-over-overlay hidden"
+>
+    <div class="game-over-card">
+        <div class="game-over-kicker">
+            FIM DA RUN
+        </div>
+
+        <h1 id="game-over-title">
+            Você morreu
+        </h1>
+
+        <p id="game-over-message">
+            A expedição terminou.
+        </p>
+
+        <div class="game-over-actions">
+            <button
+                id="restart-game-button"
+                type="button"
+                class="game-over-button primary"
+            >
+                Tentar novamente
+            </button>
+
+            <button
+                id="return-menu-button"
+                type="button"
+                class="game-over-button"
+            >
+                Voltar ao menu
+            </button>
+        </div>
+    </div>
+</div>
 
     <script
         type="module"

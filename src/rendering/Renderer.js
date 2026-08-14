@@ -1,7 +1,11 @@
+// src/rendering/Renderer.js
+
 export class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
-        this.context = canvas.getContext("2d");
+
+        this.context =
+            canvas.getContext("2d");
 
         if (!this.context) {
             throw new Error(
@@ -16,48 +20,109 @@ export class Renderer {
     }
 
     resize() {
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        this.width =
+            window.innerWidth;
 
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        this.height =
+            window.innerHeight;
+
+        this.canvas.width =
+            this.width;
+
+        this.canvas.height =
+            this.height;
     }
 
-    render({
-        world,
-        player,
-        camera,
+  render({
+    world,
+    player,
+    camera,
+    spaceship,
+    selectedSpaceship,
+    resources,
+    selectedResource,
+    currentTask,
+    timeSystem,
+    enemies
+}) {
+    this.clear();
+
+    this.context.save();
+
+    this.context.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    this.drawWorld(world);
+    this.drawGrid(world);
+
+    this.drawSpaceship(
+        spaceship,
+        selectedSpaceship
+    );
+
+    this.drawResources(
         resources,
-        selectedResource,
+        selectedResource
+    );
+
+    this.drawEnemies(
+    enemies
+);
+
+    this.drawTarget(player);
+    this.drawPlayer(player);
+
+    this.drawTaskProgress(
         currentTask
-    }) {
-        this.clear();
+    );
 
-        this.context.save();
+    this.context.restore();
 
-        this.context.translate(
-            -camera.x,
-            -camera.y
-        );
+    this.drawDayNightLighting(
+        timeSystem
+    );
+}
 
-        this.drawWorld(world);
-        this.drawGrid(world);
-        this.drawSpaceship(world);
-
-        this.drawResources(
-            resources,
-            selectedResource
-        );
-
-        this.drawTarget(player);
-        this.drawPlayer(player);
-        this.drawCollectionProgress(currentTask);
-
-        this.context.restore();
+drawDayNightLighting(
+    timeSystem
+) {
+    if (!timeSystem) {
+        return;
     }
+
+    const darkness =
+        timeSystem
+            .getDarknessAlpha();
+
+    if (darkness <= 0) {
+        return;
+    }
+
+    this.context.save();
+
+    this.context.fillStyle =
+        `rgba(
+            9,
+            16,
+            35,
+            ${darkness}
+        )`;
+
+    this.context.fillRect(
+        0,
+        0,
+        this.width,
+        this.height
+    );
+
+    this.context.restore();
+}
 
     clear() {
-        this.context.fillStyle = "#101713";
+        this.context.fillStyle =
+            "#101713";
 
         this.context.fillRect(
             0,
@@ -68,7 +133,8 @@ export class Renderer {
     }
 
     drawWorld(world) {
-        this.context.fillStyle = "#314c36";
+        this.context.fillStyle =
+            "#314c36";
 
         this.context.fillRect(
             0,
@@ -77,7 +143,9 @@ export class Renderer {
             world.height
         );
 
-        this.context.strokeStyle = "#83a786";
+        this.context.strokeStyle =
+            "#83a786";
+
         this.context.lineWidth = 6;
 
         this.context.strokeRect(
@@ -92,7 +160,7 @@ export class Renderer {
         const gridSize = 64;
 
         this.context.strokeStyle =
-            "rgba(255, 255, 255, 0.045)";
+            "rgba(255,255,255,0.045)";
 
         this.context.lineWidth = 1;
 
@@ -102,11 +170,17 @@ export class Renderer {
             x += gridSize
         ) {
             this.context.beginPath();
-            this.context.moveTo(x, 0);
+
+            this.context.moveTo(
+                x,
+                0
+            );
+
             this.context.lineTo(
                 x,
                 world.height
             );
+
             this.context.stroke();
         }
 
@@ -116,39 +190,101 @@ export class Renderer {
             y += gridSize
         ) {
             this.context.beginPath();
-            this.context.moveTo(0, y);
+
+            this.context.moveTo(
+                0,
+                y
+            );
+
             this.context.lineTo(
                 world.width,
                 y
             );
+
             this.context.stroke();
         }
     }
 
-    drawSpaceship(world) {
-        const spaceshipX = world.width / 2;
-        const spaceshipY = world.height / 2;
+    drawSpaceship(
+        spaceship,
+        selectedSpaceship
+    ) {
+        if (selectedSpaceship) {
+            this.context.strokeStyle =
+                "#f5d547";
+
+            this.context.lineWidth = 3;
+
+            this.context.beginPath();
+
+            this.context.arc(
+                spaceship.x,
+                spaceship.y,
+                spaceship.radius + 12,
+                0,
+                Math.PI * 2
+            );
+
+            this.context.stroke();
+        }
 
         this.context.save();
 
         this.context.translate(
-            spaceshipX,
-            spaceshipY
+            spaceship.x,
+            spaceship.y
         );
 
-        this.context.fillStyle = "#69757d";
+        this.context.fillStyle =
+            "rgba(0,0,0,0.25)";
 
         this.context.beginPath();
-        this.context.moveTo(0, -70);
-        this.context.lineTo(52, 60);
-        this.context.lineTo(0, 40);
-        this.context.lineTo(-52, 60);
+
+        this.context.ellipse(
+            0,
+            48,
+            65,
+            24,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        this.context.fill();
+
+        this.context.fillStyle =
+            "#69757d";
+
+        this.context.beginPath();
+
+        this.context.moveTo(
+            0,
+            -70
+        );
+
+        this.context.lineTo(
+            52,
+            60
+        );
+
+        this.context.lineTo(
+            0,
+            40
+        );
+
+        this.context.lineTo(
+            -52,
+            60
+        );
+
         this.context.closePath();
         this.context.fill();
 
-        this.context.fillStyle = "#9fd9e6";
+        this.context.fillStyle =
+            "#9fd9e6";
 
         this.context.beginPath();
+
         this.context.ellipse(
             0,
             -12,
@@ -158,6 +294,7 @@ export class Renderer {
             0,
             Math.PI * 2
         );
+
         this.context.fill();
 
         this.context.restore();
@@ -167,7 +304,10 @@ export class Renderer {
         resources,
         selectedResource
     ) {
-        for (const resource of resources) {
+        for (
+            const resource
+            of resources
+        ) {
             if (resource.isDepleted) {
                 continue;
             }
@@ -176,25 +316,41 @@ export class Renderer {
                 selectedResource?.id ===
                 resource.id
             ) {
-                this.drawSelection(resource);
+                this.drawSelection(
+                    resource
+                );
             }
 
-            if (resource.type === "tree") {
+            if (
+                resource.type === "tree"
+            ) {
                 this.drawTree(resource);
             }
 
-            if (resource.type === "rock") {
+            if (
+                resource.type === "rock"
+            ) {
                 this.drawRock(resource);
             }
 
-            if (resource.type === "bush") {
+            if (
+                resource.type === "bush"
+            ) {
                 this.drawBush(resource);
+            }
+
+            if (
+                resource.type === "scrap"
+            ) {
+                this.drawScrap(resource);
             }
         }
     }
 
     drawSelection(resource) {
-        this.context.strokeStyle = "#f5d547";
+        this.context.strokeStyle =
+            "#f5d547";
+
         this.context.lineWidth = 3;
 
         this.context.beginPath();
@@ -211,7 +367,8 @@ export class Renderer {
     }
 
     drawTree(resource) {
-        this.context.fillStyle = "#69482c";
+        this.context.fillStyle =
+            "#69482c";
 
         this.context.fillRect(
             resource.x - 8,
@@ -220,7 +377,8 @@ export class Renderer {
             36
         );
 
-        this.context.fillStyle = "#287340";
+        this.context.fillStyle =
+            "#287340";
 
         this.context.beginPath();
 
@@ -234,7 +392,8 @@ export class Renderer {
 
         this.context.fill();
 
-        this.context.fillStyle = "#3d9153";
+        this.context.fillStyle =
+            "#3d9153";
 
         this.context.beginPath();
 
@@ -250,12 +409,14 @@ export class Renderer {
     }
 
     drawRock(resource) {
-        this.context.fillStyle = "#7e8586";
+        this.context.fillStyle =
+            "#7e8586";
 
         this.context.beginPath();
 
         this.context.moveTo(
-            resource.x - resource.radius,
+            resource.x -
+                resource.radius,
             resource.y + 10
         );
 
@@ -266,29 +427,35 @@ export class Renderer {
 
         this.context.lineTo(
             resource.x + 12,
-            resource.y - resource.radius
+            resource.y -
+                resource.radius
         );
 
         this.context.lineTo(
-            resource.x + resource.radius,
+            resource.x +
+                resource.radius,
             resource.y + 8
         );
 
         this.context.lineTo(
             resource.x + 12,
-            resource.y + resource.radius
+            resource.y +
+                resource.radius
         );
 
         this.context.closePath();
         this.context.fill();
 
-        this.context.strokeStyle = "#aeb5b5";
+        this.context.strokeStyle =
+            "#aeb5b5";
+
         this.context.lineWidth = 3;
         this.context.stroke();
     }
 
     drawBush(resource) {
-        this.context.fillStyle = "#2d7f42";
+        this.context.fillStyle =
+            "#2d7f42";
 
         const positions = [
             [-12, 2],
@@ -297,7 +464,12 @@ export class Renderer {
             [0, 12]
         ];
 
-        for (const [offsetX, offsetY] of positions) {
+        for (
+            const [
+                offsetX,
+                offsetY
+            ] of positions
+        ) {
             this.context.beginPath();
 
             this.context.arc(
@@ -311,7 +483,8 @@ export class Renderer {
             this.context.fill();
         }
 
-        this.context.fillStyle = "#d95055";
+        this.context.fillStyle =
+            "#d95055";
 
         const berries = [
             [-12, -8],
@@ -320,7 +493,12 @@ export class Renderer {
             [-5, 12]
         ];
 
-        for (const [offsetX, offsetY] of berries) {
+        for (
+            const [
+                offsetX,
+                offsetY
+            ] of berries
+        ) {
             this.context.beginPath();
 
             this.context.arc(
@@ -335,12 +513,353 @@ export class Renderer {
         }
     }
 
+    drawScrap(resource) {
+        this.context.save();
+
+        this.context.translate(
+            resource.x,
+            resource.y
+        );
+
+        this.context.fillStyle =
+            "rgba(0,0,0,0.22)";
+
+        this.context.beginPath();
+
+        this.context.ellipse(
+            0,
+            15,
+            30,
+            10,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        this.context.fill();
+
+        this.context.fillStyle =
+            "#8c969b";
+
+        this.context.fillRect(
+            -25,
+            -6,
+            27,
+            14
+        );
+
+        this.context.fillStyle =
+            "#606b72";
+
+        this.context.fillRect(
+            2,
+            -15,
+            23,
+            17
+        );
+
+        this.context.fillStyle =
+            "#b6c1c6";
+
+        this.context.fillRect(
+            -10,
+            7,
+            25,
+            8
+        );
+
+        this.context.fillStyle =
+            "#6cc6df";
+
+        this.context.fillRect(
+            10,
+            -11,
+            6,
+            5
+        );
+
+        this.context.restore();
+    }
+
+    drawEnemies(enemies) {
+    if (!enemies) {
+        return;
+    }
+
+    for (
+        const enemy
+        of enemies
+    ) {
+        if (enemy.isDead) {
+            continue;
+        }
+
+        if (
+            enemy.type ===
+            "hunter"
+        ) {
+            this.drawHunter(
+                enemy
+            );
+        }
+
+        if (
+            enemy.type ===
+            "demolisher"
+        ) {
+            this.drawDemolisher(
+                enemy
+            );
+        }
+
+        this.drawEnemyHealth(
+            enemy
+        );
+    }
+}
+
+drawHunter(enemy) {
+    this.context.save();
+
+    this.context.translate(
+        enemy.x,
+        enemy.y
+    );
+
+    this.context.fillStyle =
+        "rgba(0,0,0,0.3)";
+
+    this.context.beginPath();
+
+    this.context.ellipse(
+        0,
+        enemy.radius + 7,
+        enemy.radius,
+        enemy.radius * 0.45,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#a63855";
+
+    this.context.beginPath();
+
+    this.context.arc(
+        0,
+        0,
+        enemy.radius,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#e15b75";
+
+    this.context.beginPath();
+
+    this.context.moveTo(
+        -enemy.radius,
+        -5
+    );
+
+    this.context.lineTo(
+        -enemy.radius - 11,
+        -13
+    );
+
+    this.context.lineTo(
+        -enemy.radius + 2,
+        5
+    );
+
+    this.context.fill();
+
+    this.context.beginPath();
+
+    this.context.moveTo(
+        enemy.radius,
+        -5
+    );
+
+    this.context.lineTo(
+        enemy.radius + 11,
+        -13
+    );
+
+    this.context.lineTo(
+        enemy.radius - 2,
+        5
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#f0d873";
+
+    this.context.beginPath();
+
+    this.context.arc(
+        -6,
+        -3,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.arc(
+        6,
+        -3,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.restore();
+}
+
+drawDemolisher(enemy) {
+    this.context.save();
+
+    this.context.translate(
+        enemy.x,
+        enemy.y
+    );
+
+    this.context.fillStyle =
+        "rgba(0,0,0,0.32)";
+
+    this.context.beginPath();
+
+    this.context.ellipse(
+        0,
+        enemy.radius + 9,
+        enemy.radius * 1.1,
+        enemy.radius * 0.48,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#76513d";
+
+    this.context.beginPath();
+
+    this.context.arc(
+        0,
+        0,
+        enemy.radius,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#ad7250";
+
+    this.context.beginPath();
+
+    this.context.arc(
+        -13,
+        -6,
+        11,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.arc(
+        13,
+        -6,
+        11,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.fillStyle =
+        "#d7b35c";
+
+    this.context.beginPath();
+
+    this.context.arc(
+        -7,
+        -5,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.arc(
+        7,
+        -5,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    this.context.fill();
+
+    this.context.restore();
+}
+
+drawEnemyHealth(enemy) {
+    const width = 42;
+    const height = 5;
+
+    const x =
+        enemy.x -
+        width / 2;
+
+    const y =
+        enemy.y -
+        enemy.radius -
+        15;
+
+    const progress =
+        enemy.health /
+        enemy.maxHealth;
+
+    this.context.fillStyle =
+        "rgba(0,0,0,0.65)";
+
+    this.context.fillRect(
+        x,
+        y,
+        width,
+        height
+    );
+
+    this.context.fillStyle =
+        "#d45656";
+
+    this.context.fillRect(
+        x,
+        y,
+        width * progress,
+        height
+    );
+}
+
     drawTarget(player) {
         if (!player.target) {
             return;
         }
 
-        this.context.strokeStyle = "#f5d547";
+        this.context.strokeStyle =
+            "#f5d547";
+
         this.context.lineWidth = 3;
 
         this.context.beginPath();
@@ -365,7 +884,7 @@ export class Renderer {
         );
 
         this.context.fillStyle =
-            "rgba(0, 0, 0, 0.25)";
+            "rgba(0,0,0,0.25)";
 
         this.context.beginPath();
 
@@ -381,7 +900,8 @@ export class Renderer {
 
         this.context.fill();
 
-        this.context.fillStyle = "#53b7e8";
+        this.context.fillStyle =
+            "#53b7e8";
 
         this.context.beginPath();
 
@@ -395,35 +915,49 @@ export class Renderer {
 
         this.context.fill();
 
-        this.context.strokeStyle = "#dff5ff";
+        this.context.strokeStyle =
+            "#dff5ff";
+
         this.context.lineWidth = 3;
         this.context.stroke();
 
         this.context.restore();
     }
 
-    drawCollectionProgress(currentTask) {
+    drawTaskProgress(currentTask) {
         if (
             !currentTask ||
-            currentTask.state !== "collecting"
+            currentTask.state !==
+                "performing"
         ) {
             return;
         }
 
-        const resource = currentTask.resource;
-        const progress = currentTask.progress;
+        const target =
+            currentTask.resource ??
+            currentTask.spaceship;
+
+        if (!target) {
+            return;
+        }
+
+        const progress =
+            currentTask.progress ?? 0;
 
         const width = 70;
         const height = 8;
 
-        const x = resource.x - width / 2;
+        const x =
+            target.x -
+            width / 2;
+
         const y =
-            resource.y -
-            resource.radius -
+            target.y -
+            target.radius -
             28;
 
         this.context.fillStyle =
-            "rgba(0, 0, 0, 0.65)";
+            "rgba(0,0,0,0.65)";
 
         this.context.fillRect(
             x,
@@ -432,7 +966,8 @@ export class Renderer {
             height
         );
 
-        this.context.fillStyle = "#e5c952";
+        this.context.fillStyle =
+            "#e5c952";
 
         this.context.fillRect(
             x,
@@ -442,7 +977,7 @@ export class Renderer {
         );
 
         this.context.strokeStyle =
-            "rgba(255, 255, 255, 0.65)";
+            "rgba(255,255,255,0.65)";
 
         this.context.lineWidth = 1;
 

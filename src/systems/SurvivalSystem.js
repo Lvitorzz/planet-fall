@@ -1,3 +1,5 @@
+// src/systems/SurvivalSystem.js
+
 export class SurvivalSystem {
     constructor({
         initialStamina = 100,
@@ -11,39 +13,17 @@ export class SurvivalSystem {
 
         this.lowStaminaThreshold = 20;
 
-        /*
-         * Saciedade
-         */
-        this.idleSatietyDrainPerSecond =
-            0.025;
+        this.idleSatietyDrainPerSecond = 0.025;
+        this.movingSatietyDrainPerSecond = 0.08;
+        this.activitySatietyDrainPerSecond = 0.12;
 
-        this.movingSatietyDrainPerSecond =
-            0.08;
+        this.idleStaminaRecoveryPerSecond = 1.8;
+        this.restStaminaRecoveryPerSecond = 7;
+        this.movingStaminaDrainPerSecond = 0.4;
 
-        this.activitySatietyDrainPerSecond =
-            0.12;
+        this.lowStaminaMovementMultiplier = 0.45;
+        this.lowStaminaCollectionMultiplier = 0.5;
 
-        /*
-         * Stamina
-         */
-        this.idleStaminaRecoveryPerSecond =
-            1.8;
-
-        this.movingStaminaDrainPerSecond =
-            0.4;
-
-        /*
-         * Penalidades abaixo de 20.
-         */
-        this.lowStaminaMovementMultiplier =
-            0.45;
-
-        this.lowStaminaCollectionMultiplier =
-            0.5;
-
-        /*
-         * Exaustão forçada.
-         */
         this.isExhausted = false;
 
         this.exhaustionDuration = 10;
@@ -56,13 +36,10 @@ export class SurvivalSystem {
         deltaTime,
         {
             isMoving = false,
-            isPerformingTask = false
+            isPerformingTask = false,
+            isResting = false
         } = {}
     ) {
-        /*
-         * Durante a exaustão, o personagem
-         * é considerado parado.
-         */
         if (this.isExhausted) {
             this.updateSatiety(
                 deltaTime,
@@ -91,7 +68,8 @@ export class SurvivalSystem {
             deltaTime,
             {
                 isMoving,
-                isPerformingTask
+                isPerformingTask,
+                isResting
             }
         );
     }
@@ -116,8 +94,7 @@ export class SurvivalSystem {
 
         this.satiety = this.clamp(
             this.satiety -
-                drainPerSecond *
-                deltaTime,
+                drainPerSecond * deltaTime,
             0,
             this.maxSatiety
         );
@@ -127,13 +104,22 @@ export class SurvivalSystem {
         deltaTime,
         {
             isMoving,
-            isPerformingTask
+            isPerformingTask,
+            isResting
         }
     ) {
-        /*
-         * Durante uma coleta não há
-         * recuperação passiva.
-         */
+        if (isResting) {
+            this.stamina = this.clamp(
+                this.stamina +
+                    this.restStaminaRecoveryPerSecond *
+                    deltaTime,
+                0,
+                this.maxStamina
+            );
+
+            return;
+        }
+
         if (isPerformingTask) {
             return;
         }
@@ -141,8 +127,7 @@ export class SurvivalSystem {
         if (isMoving) {
             this.stamina = this.clamp(
                 this.stamina -
-                    this
-                        .movingStaminaDrainPerSecond *
+                    this.movingStaminaDrainPerSecond *
                     deltaTime,
                 0,
                 this.maxStamina
@@ -160,8 +145,7 @@ export class SurvivalSystem {
 
         this.stamina = this.clamp(
             this.stamina +
-                this
-                    .idleStaminaRecoveryPerSecond *
+                this.idleStaminaRecoveryPerSecond *
                 recoveryMultiplier *
                 deltaTime,
             0,
@@ -175,6 +159,7 @@ export class SurvivalSystem {
         }
 
         this.stamina = 0;
+
         this.isExhausted = true;
 
         this.exhaustionRemaining =
@@ -196,6 +181,7 @@ export class SurvivalSystem {
         }
 
         this.isExhausted = false;
+
         this.exhaustionRemaining = 0;
 
         this.stamina =
@@ -207,20 +193,11 @@ export class SurvivalSystem {
             return false;
         }
 
-        /*
-         * Exige que sobre alguma stamina
-         * depois da atividade.
-         *
-         * Isso evita iniciar uma coleta
-         * exatamente com zero.
-         */
-        return this.stamina > amount;
+        return this.stamina >= amount;
     }
 
     spendStamina(amount) {
-        if (
-            !this.canSpendStamina(amount)
-        ) {
+        if (!this.canSpendStamina(amount)) {
             return false;
         }
 
@@ -229,6 +206,10 @@ export class SurvivalSystem {
             0,
             this.maxStamina
         );
+
+        if (this.stamina <= 0) {
+            this.startExhaustion();
+        }
 
         return true;
     }
@@ -292,10 +273,6 @@ export class SurvivalSystem {
             this.maxSatiety
         );
 
-        /*
-         * A comida não cancela os
-         * 10 segundos de descanso.
-         */
         if (!this.isExhausted) {
             this.stamina = this.clamp(
                 this.stamina +
@@ -367,7 +344,11 @@ export class SurvivalSystem {
         return "Condição estável.";
     }
 
-    clamp(value, minimum, maximum) {
+    clamp(
+        value,
+        minimum,
+        maximum
+    ) {
         return Math.min(
             Math.max(
                 value,

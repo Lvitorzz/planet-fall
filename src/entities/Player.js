@@ -3,7 +3,8 @@ export class Player {
         x,
         y,
         radius = 18,
-        speed = 220
+        speed = 220,
+        maxHealth = 100
     }) {
         this.x = x;
         this.y = y;
@@ -11,11 +12,20 @@ export class Player {
         this.radius = radius;
         this.speed = speed;
 
+        this.maxHealth =
+            maxHealth;
+
+        this.health =
+            maxHealth;
+
         this.target = null;
     }
 
     setTarget(x, y) {
-        this.target = { x, y };
+        this.target = {
+            x,
+            y
+        };
     }
 
     clearTarget() {
@@ -30,28 +40,31 @@ export class Player {
             return false;
         }
 
-        /*
-         * Com multiplicador zero, o destino
-         * é mantido, mas o personagem fica
-         * completamente parado.
-         */
-        if (speedMultiplier <= 0) {
+        if (
+            speedMultiplier <= 0
+        ) {
             return false;
         }
 
         const distanceX =
-            this.target.x - this.x;
+            this.target.x -
+            this.x;
 
         const distanceY =
-            this.target.y - this.y;
+            this.target.y -
+            this.y;
 
-        const distance = Math.hypot(
-            distanceX,
-            distanceY
-        );
+        const distance =
+            Math.hypot(
+                distanceX,
+                distanceY
+            );
 
-        if (distance === 0) {
+        if (
+            distance === 0
+        ) {
             this.target = null;
+
             return true;
         }
 
@@ -60,9 +73,15 @@ export class Player {
             speedMultiplier *
             deltaTime;
 
-        if (distance <= movementDistance) {
-            this.x = this.target.x;
-            this.y = this.target.y;
+        if (
+            distance <=
+            movementDistance
+        ) {
+            this.x =
+                this.target.x;
+
+            this.y =
+                this.target.y;
 
             this.target = null;
 
@@ -70,17 +89,45 @@ export class Player {
         }
 
         const directionX =
-            distanceX / distance;
+            distanceX /
+            distance;
 
         const directionY =
-            distanceY / distance;
+            distanceY /
+            distance;
 
         this.x +=
-            directionX * movementDistance;
+            directionX *
+            movementDistance;
 
         this.y +=
-            directionY * movementDistance;
+            directionY *
+            movementDistance;
 
         return false;
+    }
+
+    takeDamage(amount) {
+        this.health =
+            Math.max(
+                0,
+                this.health -
+                    amount
+            );
+    }
+
+    heal(amount) {
+        this.health =
+            Math.min(
+                this.maxHealth,
+                this.health +
+                    amount
+            );
+    }
+
+    isDead() {
+        return (
+            this.health <= 0
+        );
     }
 }
